@@ -48,6 +48,9 @@ static char termname[] = "st-256color";
 
 static unsigned int tabspaces = 4;
 
+/* background opacity */
+static const int alpha = 0xee;
+
 /**
  * Solarized dark scheme (http://ethanschoonover.com/solarized)
  * Terminal colors (16 first used in escape sequence)
