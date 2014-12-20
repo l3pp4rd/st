@@ -3195,7 +3195,7 @@ xdraws(char *s, Glyph base, int x, int y, int charlen, int bytelen) {
 	if(base.mode & ATTR_BOLD) {
 		if(BETWEEN(base.fg, 0, 7)) {
 			/* basic system colors */
-			fg = &dc.col[base.fg + 8];
+			fg = &dc.col[base.fg];
 		} else if(BETWEEN(base.fg, 16, 195)) {
 			/* 256 colors */
 			fg = &dc.col[base.fg + 36];
