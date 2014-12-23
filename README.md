@@ -26,6 +26,10 @@ In order to build st you need:
 
 Edit config.mk to match your local setup (**st** is installed into the **/usr/local** namespace by default).
 
+### Ubuntu required libraries
+
+    apt-get install libx11-dev libxext-dev libxft-dev fonts-inconsolata
+
 Afterwards enter the following command to build and install st (if
 necessary as root):
 
