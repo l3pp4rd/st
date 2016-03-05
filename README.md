@@ -37,6 +37,11 @@ necessary as root):
 
     make clean install
 
+**NOTE** concerning [inconsolata font
+changes](https://bbs.archlinux.org/viewtopic.php?id=206805), recently it
+got bold font support and if you had hinstyle set to **none** it should
+not make any impact. Otherwise you may need to set it to none.
+
 ## Running st
 
 If you did not install st with make clean install, you must compile
