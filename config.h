@@ -8,6 +8,11 @@
 static char font[] = "Inconsolata:pixelsize=19:lcdfilter=lcddefault:hintstyle=hintnone:rgba=rgb:antialias=true:autohint=false";
 static int borderpx = 0;
 static char shell[] = "/bin/zsh";
+static char *utmp = NULL;
+static char stty_args[] = "stty raw pass8 nl -echo -iexten -cstopb 38400";
+
+/* identification sequence returned in DA and DECID */
+static char vtiden[] = "\033[?6c";
 
 /* Kerning / character bounding-box mutlipliers */
 static float cwscale = 1.0;
@@ -25,7 +30,7 @@ static unsigned int doubleclicktimeout = 300;
 static unsigned int tripleclicktimeout = 600;
 
 /* alt screens */
-static bool allowaltscreen = true;
+static int allowaltscreen = 1;
 
 /* frames per second st should at maximum draw to the screen */
 static unsigned int xfps = 120;
@@ -36,6 +41,11 @@ static unsigned int actionfps = 30;
  * attribute.
  */
 static unsigned int blinktimeout = 800;
+
+/*
+ * thickness of underline and bar cursors
+ */
+static unsigned int cursorthickness = 2;
 
 /*
  * bell volume. It must be a value between -100 and 100. Use 0 for disabling
@@ -49,7 +59,7 @@ static char termname[] = "st-256color";
 static unsigned int tabspaces = 4;
 
 /* background opacity */
-static const int alpha = 0xee;
+static const int alpha = 0xcd;
 
 /**
  * Solarized dark scheme (http://ethanschoonover.com/solarized)
@@ -87,6 +97,23 @@ static const char *colorname[] = {
 static unsigned int defaultfg = 257;
 static unsigned int defaultbg = 256;
 static unsigned int defaultcs = 14;
+static unsigned int defaultrcs = 257;
+
+/*
+ * Default shape of cursor
+ * 2: Block ("█")
+ * 4: Underline ("_")
+ * 6: Bar ("|")
+ * 7: Snowman ("☃")
+ */
+static unsigned int cursorshape = 2;
+
+/*
+ * Default colour and shape of the mouse cursor
+ */
+static unsigned int mouseshape = XC_xterm;
+static unsigned int mousefg = 7;
+static unsigned int mousebg = 0;
 
 /**
  * Colors used, when the specific fg == defaultfg. So in reverse mode this
@@ -98,7 +125,7 @@ static unsigned int defaultunderline = 14;
 
 /* Internal mouse shortcuts. */
 /* Beware that overloading Button1 will disable the selection. */
-static Mousekey mshortcuts[] = {
+static MouseShortcut mshortcuts[] = {
     /* button               mask            string */
     { Button4,              XK_ANY_MOD,     "\031" },
     { Button5,              XK_ANY_MOD,     "\005" },
@@ -108,15 +135,19 @@ static Mousekey mshortcuts[] = {
 #define MODKEY Mod1Mask
 
 static Shortcut shortcuts[] = {
-    /* mask                   keysym          function        argument */
-    { ControlMask,            XK_Print,       toggleprinter,  {.i =  0} },
-    { ShiftMask,              XK_Print,       printscreen,    {.i =  0} },
-    { XK_ANY_MOD,             XK_Print,       printsel,       {.i =  0} },
-    { ShiftMask,              XK_Prior,       xzoom,          {.i = +1} },
-    { ShiftMask,              XK_Next,        xzoom,          {.i = -1} },
-    { ShiftMask,              XK_Insert,      selpaste,       {.i =  0} },
-    { MODKEY|ShiftMask,       XK_Insert,      clippaste,      {.i =  0} },
-    { MODKEY,                 XK_Num_Lock,    numlock,        {.i =  0} },
+  /* mask                 keysym          function        argument */
+  { XK_ANY_MOD,           XK_Break,       sendbreak,      {.i =  0} },
+  { ControlMask,          XK_Print,       toggleprinter,  {.i =  0} },
+  { ShiftMask,            XK_Print,       printscreen,    {.i =  0} },
+  { XK_ANY_MOD,           XK_Print,       printsel,       {.i =  0} },
+  { MODKEY|ShiftMask,     XK_Prior,       xzoom,          {.f = +1} },
+  { MODKEY|ShiftMask,     XK_Next,        xzoom,          {.f = -1} },
+  { MODKEY|ShiftMask,     XK_Home,        xzoomreset,     {.f =  0} },
+  { ShiftMask,            XK_Insert,      selpaste,       {.i =  0} },
+  { MODKEY|ShiftMask,     XK_Insert,      clippaste,      {.i =  0} },
+  { MODKEY|ShiftMask,     XK_C,           clipcopy,       {.i =  0} },
+  { MODKEY|ShiftMask,     XK_V,           clippaste,      {.i =  0} },
+  { MODKEY,               XK_Num_Lock,    numlock,        {.i =  0} },
 };
 
 /*
@@ -155,6 +186,13 @@ static KeySym mappedkeys[] = { -1 };
  * numlock (Mod2Mask) and keyboard layout (XK_SWITCH_MOD) are ignored.
  */
 static uint ignoremod = Mod2Mask|XK_SWITCH_MOD;
+
+/*
+ * Override mouse-select while mask is active (when MODE_MOUSE is set).
+ * Note that if you want to use ShiftMask with selmasks, set this to an other
+ * modifier, set to 0 to not use it.
+ */
+static uint forceselmod = ShiftMask;
 
 static Key key[] = {
     /* keysym           mask            string      appkey appcursor crlf */
@@ -364,3 +402,11 @@ static uint selmasks[] = {
     [SEL_RECTANGULAR] = Mod1Mask,
 };
 
+/*
+ * Printable characters in ASCII, used to estimate the advance width
+ * of single wide characters.
+ */
+static char ascii_printable[] =
+  " !\"#$%&'()*+,-./0123456789:;<=>?"
+  "@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"
+  "`abcdefghijklmnopqrstuvwxyz{|}~";
