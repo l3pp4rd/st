@@ -255,7 +255,7 @@ typedef struct {
 	Colormap cmap;
 	Window win;
 	Drawable buf;
-	Atom xembed, wmdeletewin, netwmname, netwmpid;
+	Atom xembed, wmdeletewin, netwmname, netwmpid, netwmstate, netwmfullscreen;
 	XIM xim;
 	XIC xic;
 	Draw draw;
@@ -338,6 +338,7 @@ static void printsel(const Arg *);
 static void printscreen(const Arg *) ;
 static void toggleprinter(const Arg *);
 static void sendbreak(const Arg *);
+static void togglefullscreen(const Arg *);
 
 /* Config.h for applying patches and the configuration. */
 #include "config.h"
@@ -3577,6 +3578,9 @@ xinit(void)
 	xw.netwmname = XInternAtom(xw.dpy, "_NET_WM_NAME", False);
 	XSetWMProtocols(xw.dpy, xw.win, &xw.wmdeletewin, 1);
 
+    	xw.netwmstate = XInternAtom(xw.dpy, "_NET_WM_STATE", False);
+    	xw.netwmfullscreen = XInternAtom(xw.dpy, "_NET_WM_STATE_FULLSCREEN", False);
+
 	xw.netwmpid = XInternAtom(xw.dpy, "_NET_WM_PID", False);
 	XChangeProperty(xw.dpy, xw.win, xw.netwmpid, XA_CARDINAL, 32,
 			PropModeReplace, (uchar *)&thispid, 1);
@@ -4242,6 +4246,39 @@ cresize(int width, int height)
 
 	tresize(col, row);
 	xresize(col, row);
+}
+
+void 
+togglefullscreen(const Arg *arg)
+{
+    Atom type;
+    int format, status;
+    unsigned long nItem, bytesAfter;
+    unsigned char *properties = NULL;
+
+    Atom wmstateremove = XInternAtom(xw.dpy,"_NET_WM_STATE_REMOVE",False);
+
+
+    status = XGetWindowProperty(xw.dpy, xw.win, xw.netwmstate, 0, (~0L), 
+            False, AnyPropertyType, &type, &format, &nItem, &bytesAfter, &properties);
+    if (status == Success && properties)
+	{
+		Atom prop = ((Atom *)properties)[0];
+        XEvent e;
+        memset( &e, 0, sizeof(e) );
+        e.type = ClientMessage;
+        e.xclient.window = xw.win;
+        e.xclient.message_type = xw.netwmstate;
+        e.xclient.format = 32;
+        e.xclient.data.l[0] = (prop != xw.netwmfullscreen) ? 1: wmstateremove;
+        e.xclient.data.l[1] = xw.netwmfullscreen;
+        e.xclient.data.l[2] = 0;
+        e.xclient.data.l[3] = 0;
+        e.xclient.data.l[4] = 0;
+        XSendEvent(xw.dpy, DefaultRootWindow(xw.dpy), 0,
+                SubstructureNotifyMask|SubstructureRedirectMask, &e);
+	}
+
 }
 
 void
