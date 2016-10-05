@@ -135,19 +135,20 @@ static MouseShortcut mshortcuts[] = {
 #define MODKEY Mod1Mask
 
 static Shortcut shortcuts[] = {
-  /* mask                 keysym          function        argument */
-  { XK_ANY_MOD,           XK_Break,       sendbreak,      {.i =  0} },
-  { ControlMask,          XK_Print,       toggleprinter,  {.i =  0} },
-  { ShiftMask,            XK_Print,       printscreen,    {.i =  0} },
-  { XK_ANY_MOD,           XK_Print,       printsel,       {.i =  0} },
-  { ControlMask,          XK_equal,       xzoom,          {.f = +1} },
-  { ControlMask,          XK_minus,       xzoom,          {.f = -1} },
-  { ControlMask,          XK_0,           xzoomreset,     {.f =  0} },
-  { ShiftMask,            XK_Insert,      selpaste,       {.i =  0} },
-  { MODKEY|ShiftMask,     XK_Insert,      clippaste,      {.i =  0} },
-  { MODKEY|ShiftMask,     XK_C,           clipcopy,       {.i =  0} },
-  { MODKEY|ShiftMask,     XK_V,           clippaste,      {.i =  0} },
-  { MODKEY,               XK_Num_Lock,    numlock,        {.i =  0} },
+  /* mask                 keysym          function            argument */
+  { XK_ANY_MOD,           XK_Break,       sendbreak,          {.i =  0} },
+  { ControlMask,          XK_Print,       toggleprinter,      {.i =  0} },
+  { ShiftMask,            XK_Print,       printscreen,        {.i =  0} },
+  { XK_ANY_MOD,           XK_Print,       printsel,           {.i =  0} },
+  { ControlMask,          XK_equal,       xzoom,              {.f = +1} },
+  { ControlMask,          XK_minus,       xzoom,              {.f = -1} },
+  { ControlMask,          XK_0,           xzoomreset,         {.f =  0} },
+  { ShiftMask,            XK_Insert,      selpaste,           {.i =  0} },
+  { MODKEY|ShiftMask,     XK_Insert,      clippaste,          {.i =  0} },
+  { MODKEY|ShiftMask,     XK_C,           clipcopy,           {.i =  0} },
+  { MODKEY|ShiftMask,     XK_V,           clippaste,          {.i =  0} },
+  { MODKEY,               XK_Num_Lock,    numlock,            {.i =  0} },
+  { XK_NO_MOD,            XK_F11,         togglefullscreen,   {.i =  0} },
 };
 
 /*
