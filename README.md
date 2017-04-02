@@ -6,8 +6,8 @@ Light, stable, simple and fast. **tmux** brings in all other needed features.
 ## Customizations
 
 - **Inconsolata** font usage.
-- **solarized** dark - color scheme.
-- **xcompmgr** is optional, when turned on - opacity configuration is taken into account for transparency.
+- **solarized** dark color scheme.
+- **transparency** support added.
 
 ## Screen
 
@@ -20,13 +20,22 @@ In order to build st you need:
 - Xlib header files - location of these might differ, edit config.mk
 - xft lib headers.
 - Inconsolata.ttf fonts, unless you change it in config.h
-- Xcompmgr - if you wish to have transparency
 
 ## Installation
 
-Edit config.mk to match your local setup (**st** is installed into the **/usr/local** namespace by default).
+Edit config.mk to match your local setup (**st** is installed into the
+**/usr/local** namespace by default).
 
-**NOTE:** to have unicode character support, install **freetype2** library headers.
+**NOTE:** to have unicode character support, install **freetype2** library
+headers.
+
+**NOTE:** **ranger** file manager may not preview images well, when having
+transparency enabled.
+
+## Transparency
+
+You need to run **compton** or **xcompmgr** in order to have transparent
+terminal.
 
 ### Ubuntu required libraries
 
